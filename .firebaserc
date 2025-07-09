@@ -1,0 +1,41 @@
+{
+  "projects": {
+    "default": "dev-damotech-platform",
+    "staging": "staging-damotech-platform",
+    "prod": "tokyo-concept-157620",
+    "dev": "dev-damotech-platform"
+  },
+  "targets": {
+    "dev-damotech-platform": {
+      "hosting": {
+        "damotrack": [
+          "dev-damotrack"
+        ],
+        "damofire": [
+          "dev-damotech-platform"
+        ]
+      }
+    },
+    "staging-damotech-platform": {
+      "hosting": {
+        "damotrack": [
+          "staging-damotrack"
+        ],
+        "damofire": [
+          "staging-damotech-platform"
+        ]
+      }
+    },
+    "tokyo-concept-157620": {
+      "hosting": {
+        "damotrack": [
+          "prod-damotrack"
+        ],
+        "damofire": [
+          "tokyo-concept-157620"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

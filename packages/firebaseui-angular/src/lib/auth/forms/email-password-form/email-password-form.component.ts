@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import { Component, inject, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { injectForm, TanStackField } from '@tanstack/angular-form';
-import { FirebaseUI } from '../../../provider';
-import { ButtonComponent } from '../../../components/button/button.component';
-import { TermsAndPrivacyComponent } from '../../../components/terms-and-privacy/terms-and-privacy.component';
+import { Component, inject, Input, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { injectForm, TanStackField } from "@tanstack/angular-form";
+import { FirebaseUI } from "../../../provider";
+import { ButtonComponent } from "../../../components/button/button.component";
+import { TermsAndPrivacyComponent } from "../../../components/terms-and-privacy/terms-and-privacy.component";
 import {
   createEmailFormSchema,
-  EmailFormSchema,
   FirebaseUIError,
   signInWithEmailAndPassword,
-} from '@firebase-ui/core';
-import { firstValueFrom } from 'rxjs';
-import { Router } from '@angular/router';
+} from "@firebase-ui/core";
+import { firstValueFrom } from "rxjs";
+import { Router } from "@angular/router";
 
 @Component({
-  selector: 'fui-email-password-form',
+  selector: "fui-email-password-form",
   standalone: true,
   imports: [
     CommonModule,
@@ -59,7 +58,7 @@ import { Router } from '@angular/router';
               class="fui-form__error"
               *ngIf="!!email.api.state.meta.errors.length"
             >
-              {{ email.api.state.meta.errors.join(', ') }}
+              {{ email.api.state.meta.errors.join(", ") }}
             </span>
           </label>
         </ng-container>
@@ -92,7 +91,7 @@ import { Router } from '@angular/router';
               class="fui-form__error"
               *ngIf="!!password.api.state.meta.errors.length"
             >
-              {{ password.api.state.meta.errors.join(', ') }}
+              {{ password.api.state.meta.errors.join(", ") }}
             </span>
           </label>
         </ng-container>
@@ -125,15 +124,20 @@ export class EmailPasswordFormComponent implements OnInit {
 
   @Input({ required: true }) forgotPasswordRoute!: string;
   @Input({ required: true }) registerRoute!: string;
+  @Input() fallbackAuthFn!: (
+    username: string,
+    password: string,
+  ) => Promise<boolean>;
 
   formError: string | null = null;
   private formSchema: any;
   private config: any;
+  private fallbackAuthUsed = false;
 
   form = injectForm({
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -154,7 +158,7 @@ export class EmailPasswordFormComponent implements OnInit {
       });
     } catch (error) {
       this.formError = await firstValueFrom(
-        this.ui.translation('errors', 'unknownError')
+        this.ui.translation("errors", "unknownError"),
       );
     }
   }
@@ -194,21 +198,40 @@ export class EmailPasswordFormComponent implements OnInit {
         }
 
         this.formError = await firstValueFrom(
-          this.ui.translation('errors', 'unknownError')
+          this.ui.translation("errors", "unknownError"),
         );
         return;
       }
 
       this.formError = null;
-      await signInWithEmailAndPassword(await firstValueFrom(this.ui.config()), email, password);
+      await signInWithEmailAndPassword(
+        await firstValueFrom(this.ui.config()),
+        email,
+        password,
+      );
     } catch (error) {
+      console.error("Login Error", JSON.stringify(error));
       if (error instanceof FirebaseUIError) {
+        if (
+          this.fallbackAuthFn &&
+          !this.fallbackAuthUsed &&
+          ["auth/user-not-found", "auth/invalid-credential"].includes(
+            error.code,
+          )
+        ) {
+          this.fallbackAuthUsed = true;
+          const response = await this.fallbackAuthFn(email, password);
+          if (response) {
+            await this.validateAndSignIn(email, password);
+          }
+        }
+
         this.formError = error.message;
         return;
       }
 
       this.formError = await firstValueFrom(
-        this.ui.translation('errors', 'unknownError')
+        this.ui.translation("errors", "unknownError"),
       );
     }
   }
@@ -218,26 +241,26 @@ export class EmailPasswordFormComponent implements OnInit {
   }
 
   get emailLabel() {
-    return this.ui.translation('labels', 'emailAddress');
+    return this.ui.translation("labels", "emailAddress");
   }
 
   get passwordLabel() {
-    return this.ui.translation('labels', 'password');
+    return this.ui.translation("labels", "password");
   }
 
   get forgotPasswordLabel() {
-    return this.ui.translation('labels', 'forgotPassword');
+    return this.ui.translation("labels", "forgotPassword");
   }
 
   get signInLabel() {
-    return this.ui.translation('labels', 'signIn');
+    return this.ui.translation("labels", "signIn");
   }
 
   get noAccountLabel() {
-    return this.ui.translation('prompts', 'noAccount');
+    return this.ui.translation("prompts", "noAccount");
   }
 
   get registerLabel() {
-    return this.ui.translation('labels', 'register');
+    return this.ui.translation("labels", "register");
   }
 }

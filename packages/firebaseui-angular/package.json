@@ -1,11 +1,11 @@
 {
   "name": "@firebase-ui/angular",
-  "version": "0.0.1",
+  "version": "0.0.8",
   "files": [
     "dist"
   ],
   "main": "./dist/fesm2022/firebase-ui-angular.mjs",
-  "module": "./dist/fesm2022/firebase-ui-angular.mjs",
+  "module": "./dist/firebase-ui-angular.mjs",
   "typings": "./dist/index.d.ts",
   "exports": {
     ".": {
@@ -14,7 +14,7 @@
     }
   },
   "scripts": {
-    "build": "ng-packagr -p ng-package.json",
+    "build": "rm -rf dist && ng-packagr -p ng-package.json",
     "publish:tags": "sh -c 'TAG=\"${npm_package_name}@${npm_package_version}\"; git tag --list \"$TAG\" | grep . || git tag \"$TAG\"; git push origin \"$TAG\"'",
     "release": "pnpm pack --pack-destination ../../releases/"
   },
