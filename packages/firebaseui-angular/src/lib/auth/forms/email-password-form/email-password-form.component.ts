@@ -58,7 +58,7 @@ import { Router } from "@angular/router";
               class="fui-form__error"
               *ngIf="!!email.api.state.meta.errors.length"
             >
-              {{ email.api.state.meta.errors.join(", ") }}
+              {{ email.api.state.meta.errors | json }}
             </span>
           </label>
         </ng-container>
@@ -85,13 +85,14 @@ import { Router } from "@angular/router";
               (input)="password.api.handleChange($any($event).target.value)"
               [attr.aria-invalid]="!!password.api.state.meta.errors.length"
             />
+
             <span
               role="alert"
               aria-live="polite"
               class="fui-form__error"
               *ngIf="!!password.api.state.meta.errors.length"
             >
-              {{ password.api.state.meta.errors.join(", ") }}
+              {{ password.api.state.meta.errors | json }}
             </span>
           </label>
         </ng-container>

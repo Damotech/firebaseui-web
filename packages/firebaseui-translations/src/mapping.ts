@@ -15,7 +15,7 @@
  */
 
 import { enUS } from "./locales/en-us";
-import { Locale, english } from ".";
+import { english, Locale } from ".";
 import type {
   ErrorKey,
   TranslationCategory,
@@ -56,7 +56,7 @@ export function getTranslation<T extends TranslationCategory>(
   category: T,
   key: TranslationKey<T>,
   translations: TranslationsConfig | undefined,
-  locale: Locale | undefined = undefined
+  locale: Locale | undefined = undefined,
 ): string {
   const userPreferredTranslationSet = translations?.[
     locale ?? english.locale

@@ -16,6 +16,7 @@
 
 import { enUS } from "./locales/en-us";
 import { Translations } from "./types";
+import { frCA } from "./locales/fr-ca";
 
 export type * from "./types";
 export * from "./mapping";
@@ -30,5 +31,6 @@ export function customLanguage(locale: Locale, translations: Translations) {
 }
 
 export const english = customLanguage("en-US", enUS);
+export const french = customLanguage("fr-CA", frCA);
 
 export type RegisteredTranslations = ReturnType<typeof customLanguage>;

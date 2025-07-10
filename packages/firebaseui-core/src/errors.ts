@@ -23,6 +23,7 @@ import {
   TranslationsConfig,
 } from '@firebase-ui/translations';
 import { FirebaseUIConfiguration } from './config';
+
 export class FirebaseUIError extends Error {
   code: string;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { english, Locale, RegisteredTranslations, TranslationsConfig } from '@firebase-ui/translations';
+import { english, french, Locale, RegisteredTranslations, TranslationsConfig } from '@firebase-ui/translations';
 import type { FirebaseApp } from 'firebase/app';
 import { Auth, getAuth } from 'firebase/auth';
 import { deepMap, DeepMapStore, map } from 'nanostores';
@@ -61,6 +61,7 @@ export function initializeUI(config: FirebaseUIConfigurationOptions, name: strin
 
   // TODO: Is this right?
   config.translations.push(english);
+  config.translations.push(french);
 
   const translations = config.translations?.reduce((acc, translation) => {
     return {
