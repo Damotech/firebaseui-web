@@ -58,6 +58,12 @@ export function getTranslation<T extends TranslationCategory>(
   translations: TranslationsConfig | undefined,
   locale: Locale | undefined = undefined,
 ): string {
+  if(category === 'errors') {
+    console.log("Category?", category);
+    console.log("Trans?", translations);
+    console.log("Locale?", locale);
+    console.log("Key?", key);
+  }
   const userPreferredTranslationSet = translations?.[
     locale ?? english.locale
   ]?.[category] as TranslationSet<T> | undefined;

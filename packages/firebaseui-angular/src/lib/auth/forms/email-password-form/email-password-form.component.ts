@@ -58,7 +58,7 @@ import { Router } from "@angular/router";
               class="fui-form__error"
               *ngIf="!!email.api.state.meta.errors.length"
             >
-              {{ email.api.state.meta.errors | json }}
+              {{ email.api.state.meta.errors[0].message }}
             </span>
           </label>
         </ng-container>
@@ -92,7 +92,7 @@ import { Router } from "@angular/router";
               class="fui-form__error"
               *ngIf="!!password.api.state.meta.errors.length"
             >
-              {{ password.api.state.meta.errors | json }}
+              {{ password.api.state.meta.errors[0].message }}
             </span>
           </label>
         </ng-container>
@@ -188,7 +188,7 @@ export class EmailPasswordFormComponent implements OnInit {
   async ngOnInit() {
     try {
       this.config = await firstValueFrom(this.ui.config());
-      this.formSchema = createEmailFormSchema(this.config?.translations);
+      this.formSchema = createEmailFormSchema(this.config?.translations, this.config?.locale);
 
       this.form.update({
         onSubmit: async ({ value }) => {

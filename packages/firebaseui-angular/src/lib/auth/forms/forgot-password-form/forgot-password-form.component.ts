@@ -62,7 +62,7 @@ import { Router } from '@angular/router';
               class="fui-form__error"
               *ngIf="!!email.api.state.meta.errors.length"
             >
-              {{ email.api.state.meta.errors.join(', ') }}
+              {{ email.api.state.meta.errors[0].message }}
             </span>
           </label>
         </ng-container>
@@ -110,9 +110,7 @@ export class ForgotPasswordFormComponent implements OnInit {
     try {
       this.config = await firstValueFrom(this.ui.config());
 
-      this.formSchema = createForgotPasswordFormSchema(
-        this.config?.translations
-      );
+      this.formSchema = createForgotPasswordFormSchema(this.config?.translations, this.config?.locale);
 
       this.form.update({
         validators: {

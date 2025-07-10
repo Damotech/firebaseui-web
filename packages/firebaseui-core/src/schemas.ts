@@ -16,22 +16,22 @@
 
 import { z } from 'zod';
 import { RecaptchaVerifier } from 'firebase/auth';
-import { type TranslationsConfig, getTranslation } from '@firebase-ui/translations';
+import {type TranslationsConfig, getTranslation, Locale} from '@firebase-ui/translations';
 
 export const LoginTypes = ['email', 'phone', 'anonymous', 'emailLink', 'google'] as const;
 export type LoginType = (typeof LoginTypes)[number];
 export type AuthMode = 'signIn' | 'signUp';
 
-export function createEmailFormSchema(translations?: TranslationsConfig) {
+export function createEmailFormSchema(translations?: TranslationsConfig, locale?: Locale) {
   return z.object({
-    email: z.string().email({ message: getTranslation('errors', 'invalidEmail', translations) }),
-    password: z.string().min(8, { message: getTranslation('errors', 'weakPassword', translations) }),
+    email: z.string().email({ message: getTranslation('errors', 'invalidEmail', translations, locale) }),
+    password: z.string().min(8, { message: getTranslation('errors', 'weakPassword', translations, locale) }),
   });
 }
 
-export function createForgotPasswordFormSchema(translations?: TranslationsConfig) {
+export function createForgotPasswordFormSchema(translations?: TranslationsConfig, locale?: Locale) {
   return z.object({
-    email: z.string().email({ message: getTranslation('errors', 'invalidEmail', translations) }),
+    email: z.string().email({ message: getTranslation('errors', 'invalidEmail', translations, locale) }),
   });
 }
 
