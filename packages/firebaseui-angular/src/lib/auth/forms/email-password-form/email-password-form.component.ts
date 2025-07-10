@@ -175,6 +175,7 @@ export class EmailPasswordFormComponent implements OnInit {
       return;
     }
 
+    this.fallbackAuthUsed = false;
     await this.validateAndSignIn(email, password);
   }
 
