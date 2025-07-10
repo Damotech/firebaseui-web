@@ -144,9 +144,6 @@ export class EmailPasswordFormComponent implements OnInit {
 
   private async handleValidationErrors(validationResult: any) {
     const validationErrors = validationResult.error.format();
-    // Log all errors for debugging
-    console.log("Validation errors:", validationErrors);
-
     if (validationErrors.email?._errors?.length) {
       this.formError = validationErrors.email._errors[0] || "Email is required";
       throw new Error(this.formError);
