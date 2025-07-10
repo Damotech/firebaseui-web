@@ -38,7 +38,7 @@ import { Router } from "@angular/router";
     TermsAndPrivacyComponent,
   ],
   template: `
-    <form (submit)="handleSubmit($event)" class="fui-form">
+    <form (submit)="onFormSubmit($event)" class="fui-form">
       <fieldset>
         <ng-container [tanstackField]="form" name="email" #email="field">
           <label [for]="email.api.name">
@@ -101,8 +101,8 @@ import { Router } from "@angular/router";
       <fui-terms-and-privacy></fui-terms-and-privacy>
 
       <fieldset>
-        <fui-button type="submit">
-          {{ signInLabel | async }}
+        <fui-button type="submit" [disabled]="!form.state.canSubmit">
+          {{ form.state.isSubmitting ? "..." : (signInLabel | async) }}
         </fui-button>
         <div class="fui-form__error" *ngIf="formError">{{ formError }}</div>
       </fieldset>
@@ -142,96 +142,88 @@ export class EmailPasswordFormComponent implements OnInit {
     },
   });
 
+  private async handleValidationErrors(validationResult: any) {
+    const validationErrors = validationResult.error.format();
+    // Log all errors for debugging
+    console.log("Validation errors:", validationErrors);
+
+    if (validationErrors.email?._errors?.length) {
+      this.formError = validationErrors.email._errors[0] || "Email is required";
+      throw new Error(this.formError);
+    }
+    if (validationErrors.password?._errors?.length) {
+      this.formError =
+        validationErrors.password._errors[0] || "Password is required";
+      throw new Error(this.formError);
+    }
+    this.formError = await firstValueFrom(
+      this.ui.translation("errors", "unknownError"),
+    );
+    throw new Error(this.formError);
+  }
+
+  private async tryFallbackAuth(email: string, password: string, error: any) {
+    if (
+      error instanceof FirebaseUIError &&
+      this.fallbackAuthFn &&
+      !this.fallbackAuthUsed &&
+      ["auth/user-not-found", "auth/invalid-credential"].includes(error.code)
+    ) {
+      this.fallbackAuthUsed = true;
+      const response = await this.fallbackAuthFn(email, password);
+      if (response) {
+        await signInWithEmailAndPassword(this.config, email, password);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  onFormSubmit(event: Event) {
+    event.preventDefault();
+    event.stopPropagation();
+    return this.form.handleSubmit(event);
+  }
+
   async ngOnInit() {
     try {
-      // Get config once
       this.config = await firstValueFrom(this.ui.config());
-
-      // Create schema once
       this.formSchema = createEmailFormSchema(this.config?.translations);
 
-      // Apply schema to form validators
       this.form.update({
+        onSubmit: async ({ value }) => {
+          this.fallbackAuthUsed = false;
+          const { email, password } = value;
+
+          const validationResult = this.formSchema.safeParse(value);
+
+          if (!validationResult.success) {
+            await this.handleValidationErrors(validationResult);
+          }
+
+          this.formError = null;
+
+          try {
+            await signInWithEmailAndPassword(this.config, email, password);
+          } catch (error) {
+            const fallbackWorked = await this.tryFallbackAuth(
+              email,
+              password,
+              error,
+            );
+            if (!fallbackWorked) {
+              this.formError = await firstValueFrom(
+                this.ui.translation("errors", "wrongPassword"),
+              );
+            }
+          }
+        },
         validators: {
           onSubmit: this.formSchema,
           onBlur: this.formSchema,
         },
       });
     } catch (error) {
-      this.formError = await firstValueFrom(
-        this.ui.translation("errors", "unknownError"),
-      );
-    }
-  }
-
-  async handleSubmit(event: SubmitEvent) {
-    event.preventDefault();
-    event.stopPropagation();
-
-    const email = this.form.state.values.email;
-    const password = this.form.state.values.password;
-
-    if (!email || !password) {
-      return;
-    }
-
-    this.fallbackAuthUsed = false;
-    await this.validateAndSignIn(email, password);
-  }
-
-  async validateAndSignIn(email: string, password: string) {
-    try {
-      const validationResult = this.formSchema.safeParse({
-        email,
-        password,
-      });
-
-      if (!validationResult.success) {
-        const validationErrors = validationResult.error.format();
-
-        if (validationErrors.email?._errors?.length) {
-          this.formError = validationErrors.email._errors[0];
-          return;
-        }
-
-        if (validationErrors.password?._errors?.length) {
-          this.formError = validationErrors.password._errors[0];
-          return;
-        }
-
-        this.formError = await firstValueFrom(
-          this.ui.translation("errors", "unknownError"),
-        );
-        return;
-      }
-
-      this.formError = null;
-      await signInWithEmailAndPassword(
-        await firstValueFrom(this.ui.config()),
-        email,
-        password,
-      );
-    } catch (error) {
-      console.error("Login Error", JSON.stringify(error));
-      if (error instanceof FirebaseUIError) {
-        if (
-          this.fallbackAuthFn &&
-          !this.fallbackAuthUsed &&
-          ["auth/user-not-found", "auth/invalid-credential"].includes(
-            error.code,
-          )
-        ) {
-          this.fallbackAuthUsed = true;
-          const response = await this.fallbackAuthFn(email, password);
-          if (response) {
-            await this.validateAndSignIn(email, password);
-          }
-        }
-
-        this.formError = error.message;
-        return;
-      }
-
       this.formError = await firstValueFrom(
         this.ui.translation("errors", "unknownError"),
       );
