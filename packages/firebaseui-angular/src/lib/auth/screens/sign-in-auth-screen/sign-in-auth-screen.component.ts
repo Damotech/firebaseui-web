@@ -14,37 +14,17 @@
  * limitations under the License.
  */
 
-import {
-  AfterContentInit,
-  Component,
-  ElementRef,
-  inject,
-  Input,
-  ViewChild,
-} from "@angular/core";
-import { CommonModule } from "@angular/common";
-import {
-  CardComponent,
-  CardHeaderComponent,
-  CardSubtitleComponent,
-  CardTitleComponent,
-} from "../../../components/card/card.component";
-import { FirebaseUI } from "../../../provider";
-import { EmailPasswordFormComponent } from "../../forms/email-password-form/email-password-form.component";
-import { DividerComponent } from "../../../components/divider/divider.component";
+import { AfterContentInit, Component, ElementRef, inject, Input, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { CardComponent, CardHeaderComponent, CardSubtitleComponent, CardTitleComponent } from '../../../components/card/card.component';
+import { FirebaseUI } from '../../../provider';
+import { EmailPasswordFormComponent } from '../../forms/email-password-form/email-password-form.component';
+import { DividerComponent } from '../../../components/divider/divider.component';
 
 @Component({
-  selector: "fui-sign-in-auth-screen",
+  selector: 'fui-sign-in-auth-screen',
   standalone: true,
-  imports: [
-    CommonModule,
-    CardComponent,
-    CardHeaderComponent,
-    CardTitleComponent,
-    CardSubtitleComponent,
-    EmailPasswordFormComponent,
-    DividerComponent,
-  ],
+  imports: [CommonModule, CardComponent, CardHeaderComponent, CardTitleComponent, CardSubtitleComponent, EmailPasswordFormComponent, DividerComponent],
   template: `
     <div class="fui-screen">
       <fui-card>
@@ -52,11 +32,7 @@ import { DividerComponent } from "../../../components/divider/divider.component"
           <fui-card-title>{{ titleText | async }}</fui-card-title>
           <fui-card-subtitle>{{ subtitleText | async }}</fui-card-subtitle>
         </fui-card-header>
-        <fui-email-password-form
-          [forgotPasswordRoute]="forgotPasswordRoute"
-          [registerRoute]="registerRoute"
-          [fallbackAuthFn]="fallbackAuthFn"
-        ></fui-email-password-form>
+        <fui-email-password-form [forgotPasswordRoute]="forgotPasswordRoute" [registerRoute]="registerRoute"></fui-email-password-form>
 
         <ng-container *ngIf="hasContent">
           <fui-divider>{{ dividerOrLabel | async }}</fui-divider>
@@ -71,13 +47,10 @@ import { DividerComponent } from "../../../components/divider/divider.component"
 export class SignInAuthScreenComponent implements AfterContentInit {
   private ui = inject(FirebaseUI);
 
-  @Input() forgotPasswordRoute: string = "";
-  @Input() registerRoute: string = "";
-  @Input() fallbackAuthFn!: (
-    username: string,
-    password: string,
-  ) => Promise<boolean>;
-  @ViewChild("contentContainer") contentContainer!: ElementRef;
+  @Input() forgotPasswordRoute: string = '';
+  @Input() registerRoute: string = '';
+  @Input() fallbackAuthFn!: (username: string, password: string) => Promise<boolean>;
+  @ViewChild('contentContainer') contentContainer!: ElementRef;
   private _hasProjectedContent = false;
 
   get hasContent(): boolean {
@@ -85,15 +58,15 @@ export class SignInAuthScreenComponent implements AfterContentInit {
   }
 
   get titleText() {
-    return this.ui.translation("labels", "signIn");
+    return this.ui.translation('labels', 'signIn');
   }
 
   get subtitleText() {
-    return this.ui.translation("prompts", "signInToAccount");
+    return this.ui.translation('prompts', 'signInToAccount');
   }
 
   get dividerOrLabel() {
-    return this.ui.translation("messages", "dividerOr");
+    return this.ui.translation('messages', 'dividerOr');
   }
 
   ngAfterContentInit() {
@@ -106,15 +79,8 @@ export class SignInAuthScreenComponent implements AfterContentInit {
       if (this.contentContainer && this.contentContainer.nativeElement) {
         const container = this.contentContainer.nativeElement;
         // Only consider it to have content if there are child nodes that aren't just whitespace
-        this._hasProjectedContent = Array.from(
-          container.childNodes as NodeListOf<Node>,
-        ).some((node: Node) => {
-          return (
-            node.nodeType === Node.ELEMENT_NODE ||
-            (node.nodeType === Node.TEXT_NODE &&
-              node.textContent &&
-              node.textContent.trim() !== "")
-          );
+        this._hasProjectedContent = Array.from(container.childNodes as NodeListOf<Node>).some((node: Node) => {
+          return node.nodeType === Node.ELEMENT_NODE || (node.nodeType === Node.TEXT_NODE && node.textContent && node.textContent.trim() !== '');
         });
       } else {
         this._hasProjectedContent = false;
