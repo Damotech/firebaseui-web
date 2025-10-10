@@ -14,29 +14,20 @@
  * limitations under the License.
  */
 
-import { Component, inject, Input, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { injectForm, TanStackField } from "@tanstack/angular-form";
-import { FirebaseUI } from "../../../provider";
-import { ButtonComponent } from "../../../components/button/button.component";
-import { TermsAndPrivacyComponent } from "../../../components/terms-and-privacy/terms-and-privacy.component";
-import {
-  createEmailFormSchema,
-  FirebaseUIError,
-  signInWithEmailAndPassword,
-} from "@firebase-ui/core";
-import { firstValueFrom } from "rxjs";
-import { Router } from "@angular/router";
+import { Component, inject, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { injectForm, TanStackField } from '@tanstack/angular-form';
+import { FirebaseUI } from '../../../provider';
+import { ButtonComponent } from '../../../components/button/button.component';
+import { TermsAndPrivacyComponent } from '../../../components/terms-and-privacy/terms-and-privacy.component';
+import { createEmailFormSchema, signInWithEmailAndPassword } from '@firebase-ui/core';
+import { firstValueFrom } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: "fui-email-password-form",
+  selector: 'fui-email-password-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    TanStackField,
-    ButtonComponent,
-    TermsAndPrivacyComponent,
-  ],
+  imports: [CommonModule, TanStackField, ButtonComponent, TermsAndPrivacyComponent],
   template: `
     <form (submit)="onFormSubmit($event)" class="fui-form">
       <fieldset>
@@ -52,12 +43,7 @@ import { Router } from "@angular/router";
               (input)="email.api.handleChange($any($event).target.value)"
               [attr.aria-invalid]="!!email.api.state.meta.errors.length"
             />
-            <span
-              role="alert"
-              aria-live="polite"
-              class="fui-form__error"
-              *ngIf="!!email.api.state.meta.errors.length"
-            >
+            <span role="alert" aria-live="polite" class="fui-form__error" *ngIf="!!email.api.state.meta.errors.length">
               {{ email.api.state.meta.errors[0].message }}
             </span>
           </label>
@@ -68,11 +54,7 @@ import { Router } from "@angular/router";
           <label [for]="password.api.name">
             <span class="flex">
               <span class="flex-grow">{{ passwordLabel | async }}</span>
-              <button
-                type="button"
-                (click)="navigateTo(forgotPasswordRoute)"
-                class="fui-form__action"
-              >
+              <button type="button" (click)="navigateTo(forgotPasswordRoute)" class="fui-form__action">
                 {{ forgotPasswordLabel | async }}
               </button>
             </span>
@@ -86,12 +68,7 @@ import { Router } from "@angular/router";
               [attr.aria-invalid]="!!password.api.state.meta.errors.length"
             />
 
-            <span
-              role="alert"
-              aria-live="polite"
-              class="fui-form__error"
-              *ngIf="!!password.api.state.meta.errors.length"
-            >
+            <span role="alert" aria-live="polite" class="fui-form__error" *ngIf="!!password.api.state.meta.errors.length">
               {{ password.api.state.meta.errors[0].message }}
             </span>
           </label>
@@ -102,19 +79,13 @@ import { Router } from "@angular/router";
 
       <fieldset>
         <fui-button type="submit" [disabled]="!form.state.canSubmit">
-          {{ form.state.isSubmitting ? "..." : (signInLabel | async) }}
+          {{ form.state.isSubmitting ? '...' : (signInLabel | async) }}
         </fui-button>
         <div class="fui-form__error" *ngIf="formError">{{ formError }}</div>
       </fieldset>
 
       <div class="flex justify-center items-center" *ngIf="registerRoute">
-        <button
-          type="button"
-          (click)="navigateTo(registerRoute)"
-          class="fui-form__action"
-        >
-          {{ noAccountLabel | async }} {{ registerLabel | async }}
-        </button>
+        <button type="button" (click)="navigateTo(registerRoute)" class="fui-form__action">{{ noAccountLabel | async }} {{ registerLabel | async }}</button>
       </div>
     </form>
   `,
@@ -125,55 +96,30 @@ export class EmailPasswordFormComponent implements OnInit {
 
   @Input({ required: true }) forgotPasswordRoute!: string;
   @Input({ required: true }) registerRoute!: string;
-  @Input() fallbackAuthFn!: (
-    username: string,
-    password: string,
-  ) => Promise<boolean>;
 
   formError: string | null = null;
   private formSchema: any;
   private config: any;
-  private fallbackAuthUsed = false;
 
   form = injectForm({
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
   private async handleValidationErrors(validationResult: any) {
     const validationErrors = validationResult.error.format();
     if (validationErrors.email?._errors?.length) {
-      this.formError = validationErrors.email._errors[0] || "Email is required";
+      this.formError = validationErrors.email._errors[0] || 'Email is required';
       throw new Error(this.formError);
     }
     if (validationErrors.password?._errors?.length) {
-      this.formError =
-        validationErrors.password._errors[0] || "Password is required";
+      this.formError = validationErrors.password._errors[0] || 'Password is required';
       throw new Error(this.formError);
     }
-    this.formError = await firstValueFrom(
-      this.ui.translation("errors", "unknownError"),
-    );
+    this.formError = await firstValueFrom(this.ui.translation('errors', 'unknownError'));
     throw new Error(this.formError);
-  }
-
-  private async tryFallbackAuth(email: string, password: string, error: any) {
-    if (
-      error instanceof FirebaseUIError &&
-      this.fallbackAuthFn &&
-      !this.fallbackAuthUsed &&
-      ["auth/user-not-found", "auth/invalid-credential"].includes(error.code)
-    ) {
-      this.fallbackAuthUsed = true;
-      const response = await this.fallbackAuthFn(email, password);
-      if (response) {
-        await signInWithEmailAndPassword(this.config, email, password);
-        return true;
-      }
-    }
-    return false;
   }
 
   onFormSubmit(event: Event) {
@@ -189,7 +135,6 @@ export class EmailPasswordFormComponent implements OnInit {
 
       this.form.update({
         onSubmit: async ({ value }) => {
-          this.fallbackAuthUsed = false;
           const { email, password } = value;
 
           const validationResult = this.formSchema.safeParse(value);
@@ -203,16 +148,7 @@ export class EmailPasswordFormComponent implements OnInit {
           try {
             await signInWithEmailAndPassword(this.config, email, password);
           } catch (error) {
-            const fallbackWorked = await this.tryFallbackAuth(
-              email,
-              password,
-              error,
-            );
-            if (!fallbackWorked) {
-              this.formError = await firstValueFrom(
-                this.ui.translation("errors", "wrongPassword"),
-              );
-            }
+            this.formError = await firstValueFrom(this.ui.translation('errors', 'wrongPassword'));
           }
         },
         validators: {
@@ -221,9 +157,7 @@ export class EmailPasswordFormComponent implements OnInit {
         },
       });
     } catch (error) {
-      this.formError = await firstValueFrom(
-        this.ui.translation("errors", "unknownError"),
-      );
+      this.formError = await firstValueFrom(this.ui.translation('errors', 'unknownError'));
     }
   }
 
@@ -232,26 +166,26 @@ export class EmailPasswordFormComponent implements OnInit {
   }
 
   get emailLabel() {
-    return this.ui.translation("labels", "emailAddress");
+    return this.ui.translation('labels', 'emailAddress');
   }
 
   get passwordLabel() {
-    return this.ui.translation("labels", "password");
+    return this.ui.translation('labels', 'password');
   }
 
   get forgotPasswordLabel() {
-    return this.ui.translation("labels", "forgotPassword");
+    return this.ui.translation('labels', 'forgotPassword');
   }
 
   get signInLabel() {
-    return this.ui.translation("labels", "signIn");
+    return this.ui.translation('labels', 'signIn');
   }
 
   get noAccountLabel() {
-    return this.ui.translation("prompts", "noAccount");
+    return this.ui.translation('prompts', 'noAccount');
   }
 
   get registerLabel() {
-    return this.ui.translation("labels", "register");
+    return this.ui.translation('labels', 'register');
   }
 }
