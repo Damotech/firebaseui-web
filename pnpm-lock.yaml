@@ -110,7 +110,7 @@ importers:
   packages/firebaseui-styles:
     devDependencies:
       tailwindcss:
-        specifier: ^4.0.0
+        specifier: 4.1.11
         version: 4.1.11
 
   packages/firebaseui-translations:
